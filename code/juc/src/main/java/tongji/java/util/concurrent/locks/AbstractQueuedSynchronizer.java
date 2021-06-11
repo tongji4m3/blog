@@ -2,6 +2,8 @@ package tongji.java.util.concurrent.locks;
 
 import sun.misc.Unsafe;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -9,6 +11,12 @@ import java.util.concurrent.locks.LockSupport;
  * rely on a single atomic int value to represent state.
  * <p>
  * Subclasses must define the protected methods that change this state, and which define what that state means in terms of this object being acquired or released.
+ * <p>
+ * 共享锁与独占锁的区别在于:
+ * 独占锁是线程独占的，同一时刻只有一个线程能拥有独占锁，AQS里将这个线程放置到exclusiveOwnerThread成员上去。
+ * 共享锁是线程共享的，同一时刻能有多个线程拥有共享锁，但AQS里并没有用来存储获得共享锁的多个线程的成员。
+ * 如果一个线程刚获取了共享锁，那么在其之后等待的线程也很有可能能够获取到锁。但独占锁不会这样做，因为锁是独占的。
+ * 当然，如果一个线程刚释放了锁，不管是独占锁还是共享锁，都需要唤醒在后面等待的线程。
  */
 public class AbstractQueuedSynchronizer {
     // 初始化state为0
@@ -77,7 +85,6 @@ public class AbstractQueuedSynchronizer {
      * 头结点，固定是一个dummy node，因为它的thread成员固定为null
      * 即使等待线程只有一个，等待队列中的节点个数也肯定是2个，因为第一个节点总是dummy node。
      * 采用lazily initialized
-     *
      */
     private volatile Node head;
     private volatile Node tail;
@@ -99,25 +106,22 @@ public class AbstractQueuedSynchronizer {
     }
 
 
-
     /**
-     *
      * 对于独占锁，AQS的state代表代表锁的状态，为0代表没有线程持有锁，非0代表有线程持有了锁。
      * 获得了锁的线程会将自己设置为exclusiveOwnerThread。
      * addWaiter负责new出一个包装当前线程的node，enq负责将node添加到队尾，如果队尾为空，它还负责添加dummy node。
      * acquireQueued是整个获取锁过程的核心，这里是指它的那个死循环。一般情况下，每次循环做的事就是：尝试获取锁，获取锁失败，阻塞，被唤醒。如果某一次循环获取锁成功，那么之后会返回到用户代码调用处。
      * shouldParkAfterFailedAcquire负责自身的前驱节点的状态设置为SIGNAL，这样，当前驱节点释放锁时，会根据SIGNAL来唤醒自身。
      * parkAndCheckInterrupt最简单，用来阻塞当前线程。它也会去检查中断状态。
-     *
+     * <p>
      * Acquires in exclusive mode, ignoring interrupts. Implemented by invoking at least once tryAcquire, returning on success.
      * Otherwise the thread is queued, possibly repeatedly blocking and unblocking, invoking tryAcquire until success.
      * <p>
      * 再等到当前线程获取锁成功后，那么acquireQueued返回的就一定是true了。再回到acquire的逻辑，发现需要进入if分支，再执行selfInterrupt()将中断状态补上，
      * 这样下一次Thread.interrupted()就能返回true了。为的就是在 回到用户代码之前，把中断状态补上，万一用户需要中断状态呢。
-     *
+     * <p>
      * tryAcquire返回false时，必将调用addWaiter和acquireQueued。
      * addWaiter是AQS的实现，因为开始获取锁失败了（tryAcquire返回false），所以需要把当前线程包装成node放到等待队列中，返回代表当前线程的node。
-     *
      */
     public final void acquire(int arg) {
         if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg)) {
@@ -135,10 +139,10 @@ public class AbstractQueuedSynchronizer {
 
     /**
      * Attempts to acquire in exclusive mode. This method should query if the state of the object permits it to be acquired in the exclusive mode, and if so to acquire it.
-     *
+     * <p>
      * 虽然AQS是一个抽象类，但却没有任何抽象方法。如果定义为抽象方法确实不合适，因为继承使用AQS并不一定需要使用到AQS提供的所有功能（独占锁和共享锁），这样子类反而需要实现所有抽象方法。
      * 如果定义为空实现的普通方法，虽然不需要子类实现所有空方法了，但这样还是不够明确。现在AQS将这些方法的实现为抛出UnsupportedOperationException异常，那么如果是子类需要使用的方法，就覆盖掉它；如果是子类不需要使用的方法，一旦调用就会抛出异常。
-     *
+     * <p>
      * tryAcquire用来获取独占锁一次，try的意思就是只试一次，要么成功，要么失败。
      */
     protected boolean tryAcquire(int arg) {
@@ -148,7 +152,7 @@ public class AbstractQueuedSynchronizer {
     /**
      * 既然执行到了addWaiter，说明当前线程第一次执行tryAcquire时失败了。
      * 既然获取锁失败了，那么就需要将当前线程包装一个node，放到等待队列的队尾上去，以后锁被释放时别人就会通过这个node来唤醒自己。
-     *
+     * <p>
      * return:不管是提前return，还是执行完enq再return，当return时，已经是将代表当前线程的node放到队尾了。注意，返回的是，代表当前线程的node。
      */
     private Node addWaiter(Node mode) {
@@ -170,14 +174,14 @@ public class AbstractQueuedSynchronizer {
 
     /**
      * 利用了自旋（循环）和CAS操作，保证了node放到队尾。
-     *
+     * <p>
      * 发现要完成双向链表的指针指向，需要经过3步：
-         * 将参数node的前驱指向tail
-         * CAS设置参数node为tail
-         * 如果CAS成功，则修正tail的后继
-     *
+     * 将参数node的前驱指向tail
+     * CAS设置参数node为tail
+     * 如果CAS成功，则修正tail的后继
+     * <p>
      * enq的尾分叉：从上面的步骤可以看出，如果存在很多个线程都刚好执行到了node.prev = t这里，那么CAS失败的线程不能成功入队，此时它们的prev还暂时指向的旧tail。
-     *
+     * <p>
      * prev的有效性：从上图第二步可以看到，此时线程1的node已经是成功放到队尾了，但此时队列却处于一个中间状态，前一个node的next还没有指向队尾呢。
      * 此时，如果另一个线程如果通过next指针遍历队列，就会漏掉最后那个node；但如果另一个线程通过tail成员的prev指针遍历队列，就不会漏掉node了。
      * prev的有效性也解释了AQS源码里遍历队列时，为什么常常使用tail成员和prev指针来遍历，比如你看unparkSuccessor。
@@ -210,12 +214,12 @@ public class AbstractQueuedSynchronizer {
      * 当前线程已经执行完了addWaiter方法。
      * 传入的node的thread成员就是当前线程。
      * 传入的node已经成功入队。（addWaiter的作用）
-     *
+     * <p>
      * 每次循环都会判断是否可以尝试获取锁（p == head），如果可以，那么尝试（tryAcquire(arg)）。
      * 如果尝试获取锁成功，那么函数的使命就达到了，执行完相应收尾工作，然后返回。
      * 如果 不可以尝试 或者 尝试获取锁却失败了，那么阻塞当前线程（parkAndCheckInterrupt）。
      * 如果当前线程被唤醒了，又会重新走这个流程。被唤醒时，是从parkAndCheckInterrupt处唤醒，然后从这里继续往下执行。
-
+     * <p>
      * 执行acquireQueued的线程一定是node参数的thread成员，虽然执行过程中，可能会经历不断 阻塞和被唤醒 的过程。
      */
     //
@@ -278,8 +282,8 @@ public class AbstractQueuedSynchronizer {
      * <p>
      * shouldPark：该函数的返回值影响是否可以执行parkAndCheckInterrupt函数。
      * AfterFailedAcquire：指的是 获取锁失败了才会执行该函数。其实具体指两种情况：
-         * 1. p == head为false，即当前线程的node的前驱不是head
-         * 2. 虽然 p == head为true，但parkAndCheckInterrupt返回false了，即当前线程虽然已经排到等待队列的最前面，但获取锁还是失败了。
+     * 1. p == head为false，即当前线程的node的前驱不是head
+     * 2. 虽然 p == head为true，但parkAndCheckInterrupt返回false了，即当前线程虽然已经排到等待队列的最前面，但获取锁还是失败了。
      * <p>
      * node一共有四种状态，但在独占锁的获取和释放过程中，我们只可能将node的状态变成CANCELLED或SIGNAL，
      * 而shouldParkAfterFailedAcquire函数就会把一个node的状态变成SIGNAL。注意，一个node新建的时候，它的waitStatus是默认初始化为0的。
@@ -348,13 +352,13 @@ public class AbstractQueuedSynchronizer {
 
     /**
      * 清理状态
-         * node不再关联到任何线程
-         * node的waitStatus置为CANCELLED
+     * node不再关联到任何线程
+     * node的waitStatus置为CANCELLED
      * node出队:包括三个场景下的出队：
-         * node是tail
-         * node既不是tail，也不是head的后继节点
-         * node是head的后继节点
-     *
+     * node是tail
+     * node既不是tail，也不是head的后继节点
+     * node是head的后继节点
+     * <p>
      * cancelAcquire()是一个出队操作，出队要调整队列的head、tail、next和prev指针。
      * 对于next指针和tail，cancelAcquire()使用了一堆CAS方法，本着一种别人不上，我上，别人上过了，我不能再乱上了的态度。这是一种积极主动的做事方式。
      * 而对于prev指针和head，cancelAcquire()则是完全交给别的线程来做，感觉像是lazy模式。
@@ -464,7 +468,7 @@ public class AbstractQueuedSynchronizer {
 
     /**
      * 进入这个方法后，会第一次进行tryAcquire尝试。但不同的，此acquireInterruptibly函数中，会去检测Thread.interrupted()，并抛出异常。
-     *
+     * <p>
      * 对于acquireInterruptibly这个方法而言，既可以是公平的，也可以是不公平的，这完全取决于tryAcquire的实现（即取决于ReentrantLock当初是怎么构造的）。
      */
     public final void acquireInterruptibly(int arg) throws InterruptedException {
@@ -474,7 +478,7 @@ public class AbstractQueuedSynchronizer {
 
     /**
      * doAcquireInterruptibly不需要返回值，因为该函数中如果检测到了中断状态，就直接抛出异常就好了。
-     *
+     * <p>
      * doAcquireInterruptibly方法的finally块是可能会执行到cancelAcquire(node)的，而acquireQueued方法不可能去执行cancelAcquire(node)的。
      * 在doAcquireInterruptibly方法中，如果线程阻塞在parkAndCheckInterrupt这里后，别的线程来中断阻塞线程，阻塞线程会被唤醒，然后抛出异常。
      * 本来抛出异常该函数就马上结束掉的，但由于有finally块，所以在结束掉之前会去执行finally块，并且由于failed为true，则会执行cancelAcquire(node)。
@@ -483,7 +487,7 @@ public class AbstractQueuedSynchronizer {
         final Node node = addWaiter(Node.EXCLUSIVE);
         boolean failed = true;
         try {
-            for (;;) {
+            for (; ; ) {
                 final Node p = node.predecessor();
                 if (p == head && tryAcquire(arg)) {
                     setHead(node);
@@ -515,12 +519,12 @@ public class AbstractQueuedSynchronizer {
      * 不管哪种情况，被唤醒后，都会检查中断状态。每个循环都会检查一次。
      */
     private boolean doAcquireNanos(int arg, long nanosTimeout) throws InterruptedException {
-        if (nanosTimeout <= 0L)  return false;
+        if (nanosTimeout <= 0L) return false;
         final long deadline = System.nanoTime() + nanosTimeout;
         final Node node = addWaiter(Node.EXCLUSIVE);
         boolean failed = true;
         try {
-            for (;;) {
+            for (; ; ) {
                 final Node p = node.predecessor();
                 if (p == head && tryAcquire(arg)) {
                     setHead(node);
@@ -538,6 +542,207 @@ public class AbstractQueuedSynchronizer {
             if (failed) cancelAcquire(node);
         }
     }
+
+
+    public final void acquireShared(int arg) {
+        if (tryAcquireShared(arg) < 0)
+            doAcquireShared(arg);
+    }
+
+    protected int tryAcquireShared(int arg) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * 两点不同
+     * 创建的节点不同。共享锁使用addWaiter(Node.SHARED)，所以会创建出想要获取共享锁的节点。而独占锁使用addWaiter(Node.EXCLUSIVE)。
+     * 获取锁成功后的善后操作不同。共享锁使用setHeadAndPropagate(node, r)，因为刚获取共享锁成功后，后面的线程也有可能成功获取，所以需要在一定条件唤醒head后继。而独占锁使用setHead(node)。
+     */
+    private void doAcquireShared(int arg) {
+        final Node node = addWaiter(Node.SHARED);
+        boolean failed = true;
+        try {
+            boolean interrupted = false;
+            for (; ; ) {
+                final Node p = node.predecessor();
+                if (p == head) {
+                    int r = tryAcquireShared(arg);
+                    if (r >= 0) {
+                        setHeadAndPropagate(node, r);
+                        p.next = null; // help GC
+                        if (interrupted)
+                            selfInterrupt();
+                        failed = false;
+                        return;
+                    }
+                }
+                if (shouldParkAfterFailedAcquire(p, node) &&
+                        parkAndCheckInterrupt())
+                    interrupted = true;
+            }
+        } finally {
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+
+    /**
+     * 如果一个线程刚获取了共享锁，那么在其之后等待的线程也很有可能能够获取到锁
+     */
+    private void setHeadAndPropagate(Node node, int propagate) {
+        Node h = head;
+        setHead(node);
+        if (propagate > 0 || h == null || h.waitStatus < 0 || (h = head) == null || h.waitStatus < 0) {
+            Node s = node.next;
+            if (s == null || s.isShared()) doReleaseShared();
+        }
+    }
+
+    public final boolean releaseShared(int arg) {
+        if (tryReleaseShared(arg)) {
+            doReleaseShared();
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean tryReleaseShared(int arg) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * 共享锁的逻辑则直接调用了doReleaseShared，但在获取共享锁成功时，也可能会调用到doReleaseShared。
+     * 也就是说，获取共享锁的线程（分为：已经获取到的线程 即执行setHeadAndPropagate中、等待获取中的线程 即阻塞在shouldParkAfterFailedAcquire里）
+     * 和释放共享锁的线程 可能在同时执行这个doReleaseShared。
+     *
+     * 共享锁与独占锁的最大不同，是共享锁可以同时被多个线程持有，虽然AQS里面没有成员用来保存持有共享锁的线程们。
+     * 由于共享锁在获取锁和释放锁时，都需要唤醒head后继，所以将其逻辑抽取成一个doReleaseShared的逻辑了。
+     */
+    private void doReleaseShared() {
+        for (; ; ) {
+            Node h = head;
+            // 判断队列是否至少有两个node，如果队列从来没有初始化过（head为null），或者head就是tail，那么中间逻辑直接不走，直接判断head是否变化了。
+            if (h != null && h != tail) {
+                int ws = h.waitStatus;
+                if (ws == Node.SIGNAL) {
+                    if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0)) continue;
+                    unparkSuccessor(h); // 如果状态为SIGNAL，说明h的后继是需要被通知的。通过对CAS操作结果取反，将compareAndSetWaitStatus(h, Node.SIGNAL, 0)和unparkSuccessor(h)绑定在了一起。说明了只要head成功得从SIGNAL修改为0，那么head的后继的代表线程肯定会被唤醒了。
+                } else if (ws == 0 && !compareAndSetWaitStatus(h, 0, Node.PROPAGATE)) {
+                    continue;
+                }
+            }
+            /*
+            循环检测到head没有变化时就会退出循环
+            head变化一定是因为：acquire thread被唤醒，之后它成功获取锁，然后setHead设置了新head。
+            而且注意，只有通过if(h == head) break;即head不变才能退出循环，不然会执行多次循环。
+            保证了，只要在某个循环的过程中有线程刚获取了锁且设置了新head，就会再次循环。目的当然是为了再次执行unparkSuccessor(h)，即唤醒队列中第一个等待的线程。
+             */
+            if (h == head) break;
+        }
+    }
+
+    /**
+     * 和Object的wait()\notify()相同之处，理解Condition接口的实现：
+     * 调用wait()的线程必须已经处于同步代码块中，换言之，调用wait()的线程已经获得了监视器锁；调用await()的线程则必须是已经获得了lock锁。
+     * 执行wait()时，当前线程会释放已获得的监视器锁，进入到该监视器的等待队列中；执行await()时，当前线程会释放已获得的lock锁，然后进入到该Condition的条件队列中。
+     * 退出wait()时，当前线程又重新获得了监视器锁；退出await()时，当前线程又重新获得了lock锁。
+     * 调用监视器的notify，会唤醒等待在该监视器上的线程，这个线程此后才重新开始锁竞争，竞争成功后，会从wait方法处恢复执行；调用Condition的signal，会唤醒等待在该Condition上的线程，这个线程此后才重新开始锁竞争，竞争成功后，会从await方法处恢复执行。
+     *
+     * 对于每个Condition对象来说，都对应到一个条件队列condition queue。而对于每个Lock对象来说，都对应到一个同步队列sync queue。
+     * 每一个Condition对象都对应到一个条件队列condition queue，而每个线程在执行await()后，都会被包装成一个node放到condition queue中去。
+     * condition queue是一个单向链表，它使用nextWaiter作为链接。这个队列中，不存在dummy node，每个节点都代表一个线程。这个队列的节点的状态，我们只关心状态是否为CONDITION，如果是CONDITION的，说明线程还等待在这个Condition对象上；如果不是CONDITION的，说明这个节点已经前往sync queue了。
+     *
+     * 假设现在存在一个Lock对象和通过这个Lock对象生成的若干个Condition对象，从队列上来说，就存在了一个sync queue和若干个与这个sync queue关联的condition queue。本来这两种队列上的节点没有关系，但现在有了signal方法，就会使得condition queue上的节点会跑到sync queue上去。
+     * 节点从从condition queue转移到sync queue上去的过程。即使是调用signalAll时，节点也是一个一个转移过去的，因为每个节点都需要重新建立sync queue的链接。
+     *
+     * 如果一个节点刚入队sync queue，说明这个节点的代表线程没有获得锁（尝试获得锁失败了）。
+     * 如果一个节点刚出队sync queue（指该节点的代表线程不在同步队列中的任何节点上，因为它已经跑到了AQS的exclusiveOwnerThread成员上去了），说明这个节点的代表线程刚获得了锁（尝试获得锁成功了）。
+     * 如果一个节点刚入队condition queue，说明这个节点的代表线程此时是有锁了，但即将释放。
+     * 如果一个节点刚出队condition queue，因为前往的是sync queue，说明这个节点的代表线程此时是没有获得锁的。
+     *
+     * 对于ReentrantLock来说，我们使用newCondition方法来获得Condition接口的实现，而ConditionObject就是一个实现了Condition接口的类。
+     *
+     * ConditionObject又是AQS的一个成员内部类，这意味着不管生成了多少个ConditionObject，它们都持有同一个AQS对象的引用，这和“一个Lock可以对应到多个Condition”相吻合。这也意味着：对于同一个AQS来说，只存在一个同步队列sync queue，但可以存在多个条件队列condition queue。
+     *
+     * 成员内部类有一个好处，不管哪个ConditionObject对象都可以调到同一个外部类AQS对象的方法上去。比如acquireQueued方法，这样，不管node在哪个condition queue上，最终它们离开后将要前往的地方总是同一个sync queue。
+     */
+    public class ConditionObject implements Condition {
+        /**
+         * firstWaiter和lastWaiter都不再需要加volatile来保证可见性了。这是因为源码作者是考虑，使用者肯定是以获得锁的前提下来调用await() / signal()这些方法的，既然有了这个前提，那么对firstWaiter的读写肯定是无竞争的，既然没有竞争也就不需要 CAS+volatile 来实现一个乐观锁了。
+         */
+        private Node firstWaiter;
+        private Node lastWaiter;
+
+        public ConditionObject() {
+        }
+
+        /**
+         * 明确会有哪些线程在执行：
+         * 执行await的当前线程。这个线程是最开始调用await的线程，也是执行await所有调用链的线程，它被包装进局部变量node中。（后面会以node线程来称呼它）
+         * 执行signal的线程。这个线程会改变await当前线程的node的状态state，使得await当前线程的node前往同步队列，并在一定条件在唤醒await当前线程。
+         * 中断await当前线程的线程。你就当这个线程只是用来唤醒await当前线程，并改变其中断状态。只不过await当前线程它自己被唤醒后，也会做和上一条同样的事情：“使得await当前线程的node前往同步队列”。
+         * 执行unlock的线程。如果await当前线程的node已经是同步队列的head后继，那么获得独占锁的线程在释放锁时，就会唤醒 await当前线程。
+         *
+         * 从用户角度来说，执行await \ signal \ unlock的前提都是线程必须已经获得了锁。
+         * todo 可恶的Condition！！！
+         */
+        @Override
+        public final void await() throws InterruptedException {
+//            if (Thread.interrupted()) throw new InterruptedException(); // 在调用await之前，当前线程就已经被中断了，那么抛出异常
+//            Node node = addConditionWaiter(); // 将当前线程包装进Node,然后放入当前Condition的条件队列
+//            int savedState = fullyRelease(node); // 释放锁，不管当前线程重入锁多少次，都要释放干净
+//            int interruptMode = 0;
+//            // 如果当前线程node不在同步队列上，说明还没有别的线程调用 当前Condition的signal。
+//            // 第一次进入该循环，肯定会符合循环条件，然后park阻塞在这里
+//            while (!isOnSyncQueue(node)) {
+//                LockSupport.park(this);
+//                /* 如果被唤醒，要么是因为别的线程调用了signal使得当前node进入同步队列，
+//                 进而当前node等到自己成为head后继后并被唤醒。
+//                 要么是因为别的线程 中断了当前线程。
+//                 如果接下来发现自己被中断过，需要检查此时signal有没有执行过，
+//                 且不管怎样，都会直接退出循环。*/
+//                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+//                    break;
+//            }
+//            if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+//                interruptMode = REINTERRUPT;
+//            if (node.nextWaiter != null) // clean up if cancelled
+//                unlinkCancelledWaiters();
+//            if (interruptMode != 0)
+//                reportInterruptAfterWait(interruptMode);
+        }
+
+        @Override
+        public void awaitUninterruptibly() {
+
+        }
+
+        @Override
+        public long awaitNanos(long nanosTimeout) throws InterruptedException {
+            return 0;
+        }
+
+        @Override
+        public boolean await(long time, TimeUnit unit) throws InterruptedException {
+            return false;
+        }
+
+        @Override
+        public boolean awaitUntil(Date deadline) throws InterruptedException {
+            return false;
+        }
+
+        @Override
+        public void signal() {
+
+        }
+
+        @Override
+        public void signalAll() {
+
+        }
+    }
+
 
     private static final Unsafe unsafe = Unsafe.getUnsafe();
     private static final long stateOffset;

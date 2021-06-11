@@ -5,12 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="badb800f-b74d-4d94-b147-1198f3655708" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/juc/src/main/java/MainTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/Semaphore.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/AbstractOwnableSynchronizer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/Lock.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/ReentrantLock.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/Condition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/Semaphore.java" beforeDir="false" afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/Semaphore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,6 +21,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
+        <option value="Interface" />
       </list>
     </option>
   </component>
@@ -62,15 +60,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
           <option name="containerStateName" value="" />
         </value>
       </option>
-      <option name="TEST_OBJECT" value="CLASS" />
-      <properties />
-      <listeners />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -91,6 +87,7 @@
       <updated>1623308519485</updated>
       <workItem from="1623308520831" duration="12697000" />
       <workItem from="1623368823435" duration="7030000" />
+      <workItem from="1623391083907" duration="3171000" />
     </task>
     <servers />
   </component>
