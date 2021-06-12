@@ -1,0 +1,5 @@
+org\simpleframework\core\annotation\Service.class
+org\simpleframework\core\annotation\Component.class
+org\simpleframework\util\ClassUtil.class
+org\simpleframework\core\annotation\Controller.class
+org\simpleframework\core\annotation\Repository.class

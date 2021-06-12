@@ -5,9 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="badb800f-b74d-4d94-b147-1198f3655708" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/Condition.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/Semaphore.java" beforeDir="false" afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/Semaphore.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/MainTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/com/tongji/controller/MyController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/com/tongji/service/MyService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/BeanContainer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/annotation/Component.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/annotation/Controller.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/annotation/Repository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/annotation/Service.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/inject/DependencyInjector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/inject/annotation/Autowired.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/util/ClassUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/util/ValidationUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/test/java/org/simpleframework/core/BeanContainerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/test/java/org/simpleframework/inject/DependencyInjectorTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spring/src/test/java/org/simpleframework/util/ClassUtilTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/3.ReentrantLock锁.md" beforeDir="false" afterPath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/3.ReentrantLock锁.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/4.AQS与应用.md" beforeDir="false" afterPath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/4.AQS与应用.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../3. 开源项目/1. Spring家族/1. Spring.md" beforeDir="false" afterPath="$PROJECT_DIR$/../3. 开源项目/1. Spring家族/1. Spring.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,8 +37,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Interface" />
+        <option value="AnnotationType" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -41,32 +59,89 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_directory_selection" value="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/inject" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../code/spring-framework" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
+    <property name="restartRequiresConfirmation" value="false" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.simpleframework" />
+      <recent name="" />
+      <recent name="util" />
       <recent name="locks" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.MainTest">
     <configuration name="MainTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="MainTest" />
-      <module name="juc" />
+      <module name="spring" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
+    <configuration name="BeanContainerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="spring" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.simpleframework.core.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.simpleframework.core" />
+      <option name="MAIN_CLASS_NAME" value="org.simpleframework.core.BeanContainerTest" />
       <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="BeanContainerTest.getBeanTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="spring" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.simpleframework.core.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.simpleframework.core" />
+      <option name="MAIN_CLASS_NAME" value="org.simpleframework.core.BeanContainerTest" />
+      <option name="METHOD_NAME" value="getBeanTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="BeanContainerTest.loadBeansTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="spring" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.simpleframework.core.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.simpleframework.core" />
+      <option name="MAIN_CLASS_NAME" value="org.simpleframework.core.BeanContainerTest" />
+      <option name="METHOD_NAME" value="loadBeansTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DependencyInjectorTest.doIocTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="spring" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.simpleframework.inject.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.simpleframework.inject" />
+      <option name="MAIN_CLASS_NAME" value="org.simpleframework.inject.DependencyInjectorTest" />
+      <option name="METHOD_NAME" value="doIocTest" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -74,6 +149,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.MainTest" />
+        <item itemvalue="JUnit.DependencyInjectorTest.doIocTest" />
+        <item itemvalue="JUnit.BeanContainerTest" />
+        <item itemvalue="JUnit.BeanContainerTest.loadBeansTest" />
+        <item itemvalue="JUnit.BeanContainerTest.getBeanTest" />
       </list>
     </recent_temporary>
   </component>
@@ -87,7 +166,10 @@
       <updated>1623308519485</updated>
       <workItem from="1623308520831" duration="12697000" />
       <workItem from="1623368823435" duration="7030000" />
-      <workItem from="1623391083907" duration="3171000" />
+      <workItem from="1623391083907" duration="11131000" />
+      <workItem from="1623455516947" duration="3009000" />
+      <workItem from="1623462322719" duration="795000" />
+      <workItem from="1623463242429" duration="5071000" />
     </task>
     <servers />
   </component>
@@ -105,5 +187,26 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/spring/src/test/java/org/simpleframework/core/BeanContainerTest.java</url>
+          <line>19</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/spring/src/test/java/org/simpleframework/core/BeanContainerTest.java</url>
+          <line>27</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="JUnit">
+        <watch expression="classSet" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
