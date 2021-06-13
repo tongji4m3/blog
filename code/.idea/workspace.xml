@@ -5,26 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="badb800f-b74d-4d94-b147-1198f3655708" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/spring/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/MainTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/com/tongji/controller/MyController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/com/tongji/service/MyService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/BeanContainer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/annotation/Component.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/annotation/Controller.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/annotation/Repository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/core/annotation/Service.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/inject/DependencyInjector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/inject/annotation/Autowired.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/util/ClassUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/main/java/org/simpleframework/util/ValidationUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/test/java/org/simpleframework/core/BeanContainerTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/test/java/org/simpleframework/inject/DependencyInjectorTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spring/src/test/java/org/simpleframework/util/ClassUtilTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/3.ReentrantLock锁.md" beforeDir="false" afterPath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/3.ReentrantLock锁.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/4.AQS与应用.md" beforeDir="false" afterPath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/4.AQS与应用.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../3. 开源项目/1. Spring家族/1. Spring.md" beforeDir="false" afterPath="$PROJECT_DIR$/../3. 开源项目/1. Spring家族/1. Spring.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/src/main/java/MainTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/MainTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,6 +61,17 @@
     <configuration name="MainTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="MainTest" />
       <module name="spring" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -170,6 +163,7 @@
       <workItem from="1623455516947" duration="3009000" />
       <workItem from="1623462322719" duration="795000" />
       <workItem from="1623463242429" duration="5071000" />
+      <workItem from="1623541507182" duration="5758000" />
     </task>
     <servers />
   </component>
