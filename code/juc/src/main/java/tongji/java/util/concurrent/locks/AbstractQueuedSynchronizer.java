@@ -149,12 +149,7 @@ public class AbstractQueuedSynchronizer {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * 既然执行到了addWaiter，说明当前线程第一次执行tryAcquire时失败了。
-     * 既然获取锁失败了，那么就需要将当前线程包装一个node，放到等待队列的队尾上去，以后锁被释放时别人就会通过这个node来唤醒自己。
-     * <p>
-     * return:不管是提前return，还是执行完enq再return，当return时，已经是将代表当前线程的node放到队尾了。注意，返回的是，代表当前线程的node。
-     */
+
     private Node addWaiter(Node mode) {
         Node node = new Node(Thread.currentThread(), mode);
         Node pred = tail;
@@ -165,9 +160,6 @@ public class AbstractQueuedSynchronizer {
                 return node;
             }
         }
-        // 执行到这里，有两种情况：
-        // 1.队列为空。head和tail成员从来没有初始化过
-        // 2.CAS操作失败。当执行compareAndSetTail时，tail成员已经被修改了
         enq(node);
         return node;
     }
@@ -209,20 +201,6 @@ public class AbstractQueuedSynchronizer {
         }
     }
 
-    /**
-     * 它解释了独占锁获取的整个过程。执行到这个函数，说明：
-     * 当前线程已经执行完了addWaiter方法。
-     * 传入的node的thread成员就是当前线程。
-     * 传入的node已经成功入队。（addWaiter的作用）
-     * <p>
-     * 每次循环都会判断是否可以尝试获取锁（p == head），如果可以，那么尝试（tryAcquire(arg)）。
-     * 如果尝试获取锁成功，那么函数的使命就达到了，执行完相应收尾工作，然后返回。
-     * 如果 不可以尝试 或者 尝试获取锁却失败了，那么阻塞当前线程（parkAndCheckInterrupt）。
-     * 如果当前线程被唤醒了，又会重新走这个流程。被唤醒时，是从parkAndCheckInterrupt处唤醒，然后从这里继续往下执行。
-     * <p>
-     * 执行acquireQueued的线程一定是node参数的thread成员，虽然执行过程中，可能会经历不断 阻塞和被唤醒 的过程。
-     */
-    //
     final boolean acquireQueued(final Node node, int arg) {
         boolean failed = true;
         try {

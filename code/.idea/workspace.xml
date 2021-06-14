@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="badb800f-b74d-4d94-b147-1198f3655708" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/4.AQS与应用.md" beforeDir="false" afterPath="$PROJECT_DIR$/../2. Java语言/3. Java多线程/4.AQS与应用.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/juc/src/main/java/tongji/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spring/src/main/java/MainTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/spring/src/main/java/MainTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spring/target/classes/MainTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/spring/target/classes/MainTest.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,17 +62,6 @@
     <configuration name="MainTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="MainTest" />
       <module name="spring" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -163,7 +153,9 @@
       <workItem from="1623455516947" duration="3009000" />
       <workItem from="1623462322719" duration="795000" />
       <workItem from="1623463242429" duration="5071000" />
-      <workItem from="1623541507182" duration="5758000" />
+      <workItem from="1623541507182" duration="6354000" />
+      <workItem from="1623570546983" duration="1578000" />
+      <workItem from="1623629386648" duration="4276000" />
     </task>
     <servers />
   </component>
@@ -194,6 +186,11 @@
           <url>file://$PROJECT_DIR$/spring/src/test/java/org/simpleframework/core/BeanContainerTest.java</url>
           <line>27</line>
           <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/spring/src/main/java/MainTest.java</url>
+          <line>8</line>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

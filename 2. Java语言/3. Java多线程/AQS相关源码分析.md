@@ -53,6 +53,15 @@ public final class Unsafe {
 
 如果调用park方法的线程已经拿到了与LockSupport关联的许可证，则调用LockSupport.park()时会马上返回，否则调用线程会被阻塞挂起。在其他线程调用unpark(Thread thread) 方法并且将当前线程作为参数时，调用park方法而被阻塞的线程会返回。另外，如果其他线程调用了阻塞线程的interrupt()方法，设置了中断标志或者被虚假唤醒，则阻塞线程也会返回。
 
+当调用interrupt方法时，会把中断状态设置为true，然后park方法会去判断中断状态，如果为true，就直接返回，然后往下继续执行，并不会抛出异常。注意，这里并不会清除中断标志。
+
+**线程如果因为调用park而阻塞的话，能够响应中断请求(中断状态被设置成true)，但是不会抛出InterruptedException**。
+
+所以park之后有两种方式让线程可以继续运行：
+
++ **LockSupport.unpark(thread)**
++ **thread.interrupt()**
+
 ```java
 public static void park(Object blocker) {
     Thread t = Thread.currentThread();
@@ -744,11 +753,62 @@ protected final boolean tryReleaseShared(int releases) {
 
 # AbstractQueuedSynchronizer
 
+## 概述
+
+简单使用案例（实现一个共享锁）：
+
+```java
+public class MyLock implements Lock {
+    private final Sync sync = new Sync(2);
+
+    private static final class Sync extends AbstractQueuedSynchronizer {
+        Sync(int count) {
+            if (count <= 0) throw new IllegalArgumentException();
+            setState(count);
+        }
+
+        @Override
+        protected int tryAcquireShared(int acquireCount) {
+            while (true) {
+                int cur = getState();
+                int newCount = cur - acquireCount;
+                if (newCount < 0 || compareAndSetState(cur, newCount)) {
+                    return newCount;
+                }
+            }
+        }
+
+        @Override
+        protected boolean tryReleaseShared(int releaseCount) {
+            while (true) {
+                int cur = getState();
+                int newCount = cur + releaseCount;
+                if (compareAndSetState(cur, newCount)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void lock() {
+        sync.acquireShared(1);
+    }
+
+    @Override
+    public void unlock() {
+        sync.releaseShared(1);
+    }
+}
+```
+
 ## 重要属性
 
 ### state
 
-state用volatile修饰，保证了它的可见性。然后如果是多线程并发修改的话，采用**compareAndSetState**来操作state；如果是没有线程安全的环境下对state操作（例如ReentrantLock释放锁，因为它之前已经获取到独占锁，所以没必要用CAS），采用**setState**方法
+- state用volatile修饰，保证了它的可见性。
+- 如果是多线程并发修改的话，采用**compareAndSetState**来操作state
+- 如果是在没有线程安全的环境下对state操作（例如ReentrantLock释放锁，因为它之前已经获取到独占锁，所以没必要用CAS），采用**setState**方法
 
 ```java
 private volatile int state;
@@ -768,6 +828,15 @@ protected final boolean compareAndSetState(int expect, int update) {
 
 ## acquire(int arg)
 
+### 流程
+
+![20216141](https://tongji2021.oss-cn-shanghai.aliyuncs.com/img/20216141.jpg)
+
++ 首先调用子类的`tryAcquire`尝试获取一次资源
++ 获取不到则调用`addWaiter(Node.EXCLUSIVE)`将该线程加入等待队列的尾部，并标记为独占模式
++ `acquireQueued`使线程在等待队列中获取资源，中途可能不断经历阻塞/唤醒状态，一直获取到资源后才返回。如果在整个等待过程中被中断过，则返回true，否则返回false。
++ 如果线程在等待过程中被中断过，它是不响应的。只是获取资源acquireQueued返回后才再进行自我中断`selfInterrupt`，将中断补上。
+
 ```java
 public final void acquire(int arg) {
     if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
@@ -777,6 +846,28 @@ protected boolean tryAcquire(int arg) {
     throw new UnsupportedOperationException();
 }
 
+static void selfInterrupt() {
+    Thread.currentThread().interrupt();
+}
+```
+
+### addWaiter(Node)
+
+![202161413](https://tongji2021.oss-cn-shanghai.aliyuncs.com/img/202161413.jpg)
+
++ 将当前线程封装成一个节点（`Node.EXCLUSIVE`互斥模式、`Node.SHARED`共享模式）
++ 尝试快速入队：通过一次CAS加入到等待队列的队尾。
++ 如果**CAS失败或者队列为空**，则通过enq(node)方法初始化一个等待队列
++ 在enq(node)中，如果队列为空，则会给头部设置一个空节点：`compareAndSetHead(new Node())`，随后不断自旋直到把node加入到等待队列队尾
++ 返回当前线程所在的结点
+
+**注意点**
+
+如果是多线程执行，可能导致多个node.prev链接到了tail，但是通过CAS保证tail.next只会链接到其中一个Node，并且其他的Node在不断的自旋中最终还是会加入到等待队列中
+
+**prev的有效性**：有可能产生这样一种中间状态，即node.prev指向了原先的tail，但是tail.next还没来得及指向node。这时如果另一个线程通过next指针遍历队列，就会漏掉最后一个node。但是如果是通过tail.prev来遍历等待队列，就不会漏掉节点
+
+```java
 private Node addWaiter(Node mode) {
     Node node = new Node(Thread.currentThread(), mode);
     Node pred = tail;
@@ -814,9 +905,19 @@ private final boolean compareAndSetHead(Node update) {
 private final boolean compareAndSetTail(Node expect, Node update) {
     return unsafe.compareAndSwapObject(this, tailOffset, expect, update);
 }
+```
 
+### acquireQueued
+
+![202161412](https://tongji2021.oss-cn-shanghai.aliyuncs.com/img/202161412.jpg)
+
++ 每次循环都会判断是否可以尝试获取锁（判断前驱节点p是否为head），如果可以，那么尝试tryAcquire(arg)
++ 如果不可以尝试，或者获取锁失败，则通过parkAndCheckInterrupt阻塞线程
++ 如果线程被unpark/interrupt，则会从park中返回，接着从parkAndCheckInterrupt()返回，继续往下执行
+
+```java
 final boolean acquireQueued(final Node node, int arg) {
-    boolean failed = true;
+    boolean failed = true; 
     try {
         boolean interrupted = false;
         for (;;) {
@@ -831,7 +932,7 @@ final boolean acquireQueued(final Node node, int arg) {
                 interrupted = true;
         }
     } finally {
-        if (failed) cancelAcquire(node);
+        if (failed) cancelAcquire(node); // 该方法不会被执行
     }
 }
 
@@ -859,11 +960,11 @@ private final boolean parkAndCheckInterrupt() {
     LockSupport.park(this);
     return Thread.interrupted();
 }
-
-static void selfInterrupt() {
-    Thread.currentThread().interrupt();
-}
 ```
+
+### 注意点
+
++ 整个过程忽略用户发出的中断信号（也就是由于线程获取同步状态失败后进入同步队列中，后续对线程进行中断操作时，线程不会从同步队列中移出），直到acquireQueued执行结束后，才通过selfInterrupt恢复用户的中断
 
 ## release(int arg)
 
